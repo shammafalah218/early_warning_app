@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "444529864907",
+    "project_id": "ai--based-early-warning",
+    "storage_bucket": "ai--based-early-warning.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:444529864907:android:3d15bf0b561d0d4060ab4e",
+        "android_client_info": {
+          "package_name": "com.example.early_warning_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "444529864907-92mqogn994um8ufmg2k8guhj0el59ure.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYYzktsBUenkHBl03xai7OsnWfzHYNh7A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "444529864907-92mqogn994um8ufmg2k8guhj0el59ure.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "444529864907-orpote9b38oifgslu41qkuj10q4bo21e.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.earlyWarningApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
