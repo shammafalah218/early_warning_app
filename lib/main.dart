@@ -5,6 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import 'firebase_options.dart';
+import 'user_form_page.dart';
+import 'dashboard_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -109,56 +111,76 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> login() async {
-    final email = emailController.text.trim();
-    final password = passwordController.text;
+  final email = emailController.text.trim();
+  final password = passwordController.text;
 
-    if (email.isEmpty || password.isEmpty) {
-      setState(() {
-        message = 'Enter email and password';
-      });
-      return;
-    }
+  if (email.isEmpty || password.isEmpty) {
+    setState(() {
+      message = 'Enter email and password';
+    });
+    return;
+  }
 
-    try {
-      setState(() {
-        loading = true;
-        message = '';
-      });
+  try {
+    setState(() {
+      loading = true;
+      message = '';
+    });
 
-      if (FirebaseAuth.instance.currentUser != null) {
-        await FirebaseAuth.instance.signOut();
-      }
+    await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
 
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
+    final user = FirebaseAuth.instance.currentUser!;
+
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    final data = userDoc.data();
+
+    final profileCompleted =
+        data != null && data['profileCompleted'] == true;
+
+    if (!mounted) return;
+
+    if (profileCompleted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const DashboardPage(),
+        ),
       );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const UserFormPage(),
+        ),
+      );
+    }
+  } on FirebaseAuthException catch (e) {
+    if (!mounted) return;
 
-      if (!mounted) return;
+    setState(() {
+      message = e.message ?? 'Login failed';
+    });
+  } catch (e) {
+    if (!mounted) return;
 
+    setState(() {
+      message = 'Login failed: $e';
+    });
+  } finally {
+    if (mounted) {
       setState(() {
-        message = 'Login successful ✅';
+        loading = false;
       });
-    } on FirebaseAuthException catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        message = e.message ?? 'Login failed';
-      });
-    } catch (e) {
-      if (!mounted) return;
-
-      setState(() {
-        message = 'Login failed: $e';
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          loading = false;
-        });
-      }
     }
   }
+}
 
   Future<void> googleLogin() async {
     try {
