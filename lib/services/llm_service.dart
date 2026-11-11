@@ -68,14 +68,25 @@ Rules:
       'severity': severity.name,
       'category': category,
       'findings': findings.map((f) => f.toMap()).toList(),
-      'user': {
-        'age': profile?.age,
-        'sex': profile?.gender,
-        'bmi': profile?.bmi == null ? null : double.parse(profile!.bmi!.toStringAsFixed(1)),
-        'familyHistoryDiabetes': profile?.familyHistoryDiabetes,
-        'familyHistoryHypertension': profile?.familyHistoryHypertension,
-        'smoker': profile?.smoker,
-      },
+      
+'user': {
+  'age': profile?.age,
+  'sex': profile?.gender,
+  'bmi': profile?.bmi == null
+      ? null
+      : double.parse(profile!.bmi!.toStringAsFixed(1)),
+  'familyHistoryDiabetes': profile?.familyHistoryDiabetes,
+  'familyHistoryHypertension': profile?.familyHistoryHypertension,
+  'smoker': profile?.smoker,
+
+  // Input 3: User Medical History
+  'diagnosedDiabetes': profile?.diagnosedDiabetes,
+  'diagnosedHypertension': profile?.diagnosedHypertension,
+  'diabetesType': profile?.diabetesType,
+  'diagnosisYear': profile?.diagnosisYear,
+  'medicalHistory': profile?.medicalHistory,
+},
+
     };
     try {
       final res = await _model
