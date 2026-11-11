@@ -9,16 +9,8 @@ import '../services/firestore_service.dart';
 /// optional risk-factor questions used as context for the AI explanation.
 class ProfileScreen extends StatefulWidget {
   final UserProfile? existing;
+
   const ProfileScreen({super.key, this.existing});
-  @override
-void dispose() {
-  _age.dispose();
-  _height.dispose();
-  _weight.dispose();
-  _diagnosisYear.dispose();
-  _medicalHistory.dispose();
-  super.dispose();
-}
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -88,7 +80,15 @@ language: _language,
     await FirestoreService.instance.saveProfile(p);
     if (mounted && Navigator.canPop(context)) Navigator.pop(context);
   }
-
+  @override
+  void dispose() {
+    _age.dispose();
+    _height.dispose();
+    _weight.dispose();
+    _diagnosisYear.dispose();
+    _medicalHistory.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
