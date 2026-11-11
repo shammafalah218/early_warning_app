@@ -10,6 +10,15 @@ import '../services/firestore_service.dart';
 class ProfileScreen extends StatefulWidget {
   final UserProfile? existing;
   const ProfileScreen({super.key, this.existing});
+  @override
+void dispose() {
+  _age.dispose();
+  _height.dispose();
+  _weight.dispose();
+  _diagnosisYear.dispose();
+  _medicalHistory.dispose();
+  super.dispose();
+}
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -24,6 +33,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late bool _fhDiabetes = widget.existing?.familyHistoryDiabetes ?? false;
   late bool _fhHypertension = widget.existing?.familyHistoryHypertension ?? false;
   late bool _smoker = widget.existing?.smoker ?? false;
+  late bool _diagnosedDiabetes =
+    widget.existing?.diagnosedDiabetes ?? false;
+
+late bool _diagnosedHypertension =
+    widget.existing?.diagnosedHypertension ?? false;
+
+late String? _diabetesType =
+    widget.existing?.diabetesType;
+
+late final _diagnosisYear = TextEditingController(
+  text: widget.existing?.diagnosisYear?.toString() ?? '',
+);
+
+late final _medicalHistory = TextEditingController(
+  text: widget.existing?.medicalHistory ?? '',
+);
   late String _language = widget.existing?.language ?? 'en';
   bool _saving = false;
 
@@ -48,8 +73,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
       weight: double.parse(_weight.text),
       familyHistoryDiabetes: _fhDiabetes,
       familyHistoryHypertension: _fhHypertension,
-      smoker: _smoker,
-      language: _language,
+     smoker: _smoker,
+diagnosedDiabetes: _diagnosedDiabetes,
+diagnosedHypertension: _diagnosedHypertension,
+diabetesType: _diagnosedDiabetes ? _diabetesType : null,
+diagnosisYear: _diagnosisYear.text.trim().isEmpty
+    ? null
+    : int.parse(_diagnosisYear.text.trim()),
+medicalHistory: _medicalHistory.text.trim().isEmpty
+    ? null
+    : _medicalHistory.text.trim(),
+language: _language,
     );
     await FirestoreService.instance.saveProfile(p);
     if (mounted && Navigator.canPop(context)) Navigator.pop(context);
@@ -114,6 +148,88 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
             onChanged: (v) => setState(() => _language = v!),
           ),
+          const SizedBox(height: 24),
+
+Text(
+  'Medical History',
+  style: Theme.of(context).textTheme.titleMedium,
+),
+
+SwitchListTile(
+  title: const Text('I have been diagnosed with diabetes'),
+  value: _diagnosedDiabetes,
+  onChanged: (v) => setState(() {
+    _diagnosedDiabetes = v;
+    if (!v) _diabetesType = null;
+  }),
+),
+
+SwitchListTile(
+  title: const Text('I have been diagnosed with hypertension'),
+  value: _diagnosedHypertension,
+  onChanged: (v) =>
+      setState(() => _diagnosedHypertension = v),
+),
+
+if (_diagnosedDiabetes)
+  DropdownButtonFormField<String>(
+    key: ValueKey(_diabetesType),
+    initialValue: _diabetesType,
+    decoration: const InputDecoration(
+      labelText: 'Diabetes Type',
+    ),
+    items: const [
+      DropdownMenuItem(value: 'Type 1', child: Text('Type 1')),
+      DropdownMenuItem(value: 'Type 2', child: Text('Type 2')),
+      DropdownMenuItem(value: 'Other', child: Text('Other')),
+      DropdownMenuItem(value: 'Unknown', child: Text('Unknown')),
+    ],
+    onChanged: (v) => setState(() => _diabetesType = v),
+  ),
+
+TextFormField(
+  controller: _diagnosisYear,
+  decoration: const InputDecoration(
+    labelText: 'Year of Diagnosis (optional)',
+  ),
+  keyboardType: TextInputType.number,
+  validator: (v) {
+    if (v == null || v.trim().isEmpty) return null;
+    final year = int.tryParse(v.trim());
+    if (year == null || year < 1900 ||
+        year > DateTime.now().year) {
+      return 'Enter a valid diagnosis year';
+    }
+    return null;
+  },
+),
+
+TextFormField(
+  controller: _medicalHistory,
+  decoration: const InputDecoration(
+    labelText: 'Additional Medical History (optional)',
+    hintText: 'Enter relevant medical information',
+  ),
+  maxLines: 3,
+),
+
+FormField<bool>(
+  validator: (_) =>
+      !_diagnosedDiabetes && !_diagnosedHypertension
+          ? 'Please select at least one diagnosed condition'
+          : null,
+  builder: (field) => field.hasError
+      ? Padding(
+          padding: const EdgeInsets.all(8),
+          child: Text(
+            field.errorText!,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.error,
+            ),
+          ),
+        )
+      : const SizedBox.shrink(),
+),
           const SizedBox(height: 24),
           FilledButton(
             onPressed: _saving ? null : _save,
