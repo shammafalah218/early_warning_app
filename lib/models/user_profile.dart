@@ -14,6 +14,12 @@ class UserProfile {
   final bool familyHistoryDiabetes;
   final bool familyHistoryHypertension;
   final bool smoker;
+  final bool diagnosedDiabetes;
+final bool diagnosedHypertension;
+final String? diabetesType;
+final int? diagnosisYear;
+final String? medicalHistory;
+  
   final String language; // 'en' or 'ar' — language for AI explanations
   final bool profileCompleted;
 
@@ -28,6 +34,11 @@ class UserProfile {
     this.familyHistoryDiabetes = false,
     this.familyHistoryHypertension = false,
     this.smoker = false,
+    this.diagnosedDiabetes = false,
+this.diagnosedHypertension = false,
+this.diabetesType,
+this.diagnosisYear,
+this.medicalHistory,
     this.language = 'en',
     this.profileCompleted = false,
   });
@@ -49,6 +60,11 @@ class UserProfile {
         familyHistoryHypertension:
             m['familyHistoryHypertension'] as bool? ?? false,
         smoker: m['smoker'] as bool? ?? false,
+    diagnosedDiabetes: m['diagnosedDiabetes'] as bool? ?? false,
+diagnosedHypertension: m['diagnosedHypertension'] as bool? ?? false,
+diabetesType: m['diabetesType'] as String?,
+diagnosisYear: (m['diagnosisYear'] as num?)?.toInt(),
+medicalHistory: m['medicalHistory'] as String?,
         language: m['language'] as String? ?? 'en',
         profileCompleted: m['profileCompleted'] as bool? ?? false,
       );
@@ -61,6 +77,11 @@ class UserProfile {
         'familyHistoryDiabetes': familyHistoryDiabetes,
         'familyHistoryHypertension': familyHistoryHypertension,
         'smoker': smoker,
+    'diagnosedDiabetes': diagnosedDiabetes,
+'diagnosedHypertension': diagnosedHypertension,
+'diabetesType': diabetesType,
+'diagnosisYear': diagnosisYear,
+'medicalHistory': medicalHistory,
         'language': language,
         'profileCompleted': true,
         'updatedAt': FieldValue.serverTimestamp(),
