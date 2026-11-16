@@ -9,6 +9,7 @@ import '../services/firestore_service.dart';
 import '../services/health_service.dart';
 import '../services/monitoring_service.dart';
 import 'alerts_screen.dart';
+import 'health_chat_screen.dart';
 import 'health_history_screen.dart';
 import 'health_targets_screen.dart';
 import 'medications_screen.dart';
@@ -175,13 +176,34 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: _violet,
-        foregroundColor: Colors.white,
-        onPressed: () => Navigator.push(
-            context, MaterialPageRoute(builder: (_) => const ManualEntryScreen())),
-        icon: const Icon(Icons.add),
-        label: const Text('BP / Glucose'),
+      floatingActionButton: StreamBuilder<UserProfile?>(
+        stream: _db.profileStream(_uid),
+        builder: (context, snapshot) {
+          final profile = snapshot.data;
+          if (profile == null) return const SizedBox.shrink();
+          final diabetes = profile.diagnosedDiabetes;
+          final hypertension = profile.diagnosedHypertension;
+          if (!diabetes && !hypertension) return const SizedBox.shrink();
+
+          final label = diabetes && hypertension
+              ? 'BP / Glucose'
+              : diabetes
+                  ? 'Add Blood Glucose'
+                  : 'Add Blood Pressure';
+          return FloatingActionButton.extended(
+            backgroundColor: _violet,
+            foregroundColor: Colors.white,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ManualEntryScreen(
+                showBloodPressure: hypertension,
+                showBloodGlucose: diabetes,
+              )),
+            ),
+            icon: const Icon(Icons.add),
+            label: Text(label),
+          );
+        },
       ),
       body: Stack(children: [
         Positioned.fill(child: AnimatedBuilder(animation: _motion,
@@ -285,10 +307,12 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     _metric(Icons.bedtime_outlined, 'Resting heart rate', _latest(r, ReadingType.restingHeartRate)),
                     _metric(Icons.directions_walk, 'Steps (daily total)', _latest(r, ReadingType.steps),
                         emptyText: 'Apple Watch data will appear here'),
-                    _metric(Icons.speed, 'Blood pressure', _latest(r, ReadingType.bloodPressure),
-                        emptyText: 'Tap + to add a cuff reading'),
-                    _metric(Icons.water_drop_outlined, 'Blood glucose', _latest(r, ReadingType.bloodGlucose),
-                        emptyText: 'Tap + to add a glucometer reading'),
+                    if (p?.diagnosedHypertension == true)
+                      _metric(Icons.speed, 'Blood pressure', _latest(r, ReadingType.bloodPressure),
+                          emptyText: 'Tap + to add a cuff reading'),
+                    if (p?.diagnosedDiabetes == true)
+                      _metric(Icons.water_drop_outlined, 'Blood glucose', _latest(r, ReadingType.bloodGlucose),
+                          emptyText: 'Tap + to add a glucometer reading'),
                     const SizedBox(height: 12),
                     const Padding(
                       padding: EdgeInsets.fromLTRB(3, 18, 0, 14),
@@ -299,6 +323,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                     _feature(Icons.show_chart_rounded, 'Health Trends',
                       'Glucose & blood pressure · 7 / 30 days',
                       const HealthHistoryScreen()),
+                    _feature(Icons.chat_bubble_outline_rounded, 'AI Health Chat',
+                      'Ask general health questions',
+                      const HealthChatScreen()),
                     _feature(Icons.medication_outlined, 'My Medications',
                       'Daily reminders and dose tracking',
                       const MedicationsScreen()),

@@ -12,7 +12,14 @@ import '../services/reminder_service.dart';
 /// (from a home cuff / glucometer) unless a connected device writes them
 /// to Apple Health / Health Connect.
 class ManualEntryScreen extends StatefulWidget {
-  const ManualEntryScreen({super.key});
+  const ManualEntryScreen({
+    super.key,
+    this.showBloodPressure = true,
+    this.showBloodGlucose = true,
+  });
+
+  final bool showBloodPressure;
+  final bool showBloodGlucose;
 
   @override
   State<ManualEntryScreen> createState() => _ManualEntryScreenState();
@@ -35,11 +42,11 @@ class _ManualEntryScreenState extends State<ManualEntryScreen> {
 
   Future<void> _save() async {
     if (!_form.currentState!.validate()) return;
-    final hasBp = _sys.text.isNotEmpty && _dia.text.isNotEmpty;
-    final hasGlu = _glu.text.isNotEmpty;
+    final hasBp = widget.showBloodPressure && _sys.text.isNotEmpty && _dia.text.isNotEmpty;
+    final hasGlu = widget.showBloodGlucose && _glu.text.isNotEmpty;
     if (!hasBp && !hasGlu) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Enter blood pressure and/or glucose')));
+          const SnackBar(content: Text('Enter a reading before saving')));
       return;
     }
     setState(() => _saving = true);
@@ -93,10 +100,17 @@ class _ManualEntryScreenState extends State<ManualEntryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add a reading')),
+      appBar: AppBar(title: Text(
+        widget.showBloodPressure && widget.showBloodGlucose
+            ? 'Add a reading'
+            : widget.showBloodPressure
+                ? 'Add Blood Pressure'
+                : 'Add Blood Glucose',
+      )),
       body: Form(
         key: _form,
         child: ListView(padding: const EdgeInsets.all(20), children: [
+          if (widget.showBloodPressure) ...[
           Text('Blood pressure', style: Theme.of(context).textTheme.titleMedium),
           Row(children: [
             Expanded(
@@ -119,6 +133,8 @@ class _ManualEntryScreenState extends State<ManualEntryScreen> {
                 style: TextStyle(fontSize: 12)),
           ),
           const SizedBox(height: 28),
+          ],
+          if (widget.showBloodGlucose) ...[
           Text('Blood glucose (mg/dL)', style: Theme.of(context).textTheme.titleMedium),
           TextFormField(
               controller: _glu,
@@ -135,6 +151,7 @@ class _ManualEntryScreenState extends State<ManualEntryScreen> {
             onSelectionChanged: (s) => setState(() => _gluContext = s.first),
           ),
           const SizedBox(height: 28),
+          ],
           FilledButton(
               onPressed: _saving ? null : _save,
               child: Text(_saving ? 'Analysing…' : 'Save & analyse')),

@@ -88,6 +88,7 @@ Rules:
 },
 
     };
+     print('GEMINI TEST: explain() was called');
     try {
       final res = await _model
           .generateContent([Content.text(jsonEncode(context))])
@@ -109,9 +110,13 @@ Rules:
         model: modelName,
         createdAt: DateTime.now(),
       );
-    } catch (_) {
-      return _fallback(category, severity, findings);
-    }
+   
+} catch (e, stackTrace) {
+  print('GEMINI ERROR: $e');
+  print('GEMINI STACK TRACE: $stackTrace');
+  return _fallback(category, severity, findings);
+}
+
   }
 
   static String _fallbackTitle(String c) => const {
