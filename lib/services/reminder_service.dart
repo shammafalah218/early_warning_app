@@ -70,4 +70,28 @@ class ReminderService {
           importance: Importance.high, priority: Priority.high),
       ));
   }
+  Future<void> urgentNotice(String message) async {
+  await requestPermission();
+
+  await _plugin.show(
+    900002,
+    'URGENT HEALTH ALERT',
+    message,
+    const NotificationDetails(
+      iOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      ),
+      android: AndroidNotificationDetails(
+        'urgent_health_alerts',
+        'Urgent Health Alerts',
+        channelDescription: 'Notifications for urgent health readings',
+        importance: Importance.max,
+        priority: Priority.max,
+        playSound: true,
+      ),
+    ),
+  );
+}
 }
