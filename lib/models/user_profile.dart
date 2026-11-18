@@ -19,6 +19,7 @@ final bool diagnosedHypertension;
 final String? diabetesType;
 final int? diagnosisYear;
 final String? medicalHistory;
+  final bool aiConsent;
   
   final String language; // 'en' or 'ar' — language for AI explanations
   final bool profileCompleted;
@@ -39,6 +40,7 @@ this.diagnosedHypertension = false,
 this.diabetesType,
 this.diagnosisYear,
 this.medicalHistory,
+    this.aiConsent = false,
     this.language = 'en',
     this.profileCompleted = false,
   });
@@ -65,6 +67,7 @@ diagnosedHypertension: m['diagnosedHypertension'] as bool? ?? false,
 diabetesType: m['diabetesType'] as String?,
 diagnosisYear: (m['diagnosisYear'] as num?)?.toInt(),
 medicalHistory: m['medicalHistory'] as String?,
+    aiConsent: m['aiConsent'] as bool? ?? false,
         language: m['language'] as String? ?? 'en',
         profileCompleted: m['profileCompleted'] as bool? ?? false,
       );
@@ -82,6 +85,7 @@ medicalHistory: m['medicalHistory'] as String?,
 'diabetesType': diabetesType,
 'diagnosisYear': diagnosisYear,
 'medicalHistory': medicalHistory,
+    'aiConsent': aiConsent,
         'language': language,
         'profileCompleted': true,
         'updatedAt': FieldValue.serverTimestamp(),
