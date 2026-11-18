@@ -342,8 +342,9 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                           color: Color(0xFF392550))),
                     ),
                     _feature(Icons.show_chart_rounded, 'Health Trends',
-                      'Glucose & blood pressure · 7 / 30 days',
-                      HealthHistoryScreen(showSimulated: _demoMode)
+  'Glucose & blood pressure · 7 / 30 days',
+  HealthHistoryScreen(showSimulated: _demoMode),
+),
                     _feature(Icons.chat_bubble_outline_rounded, 'AI Health Chat',
                       'Ask general health questions',
                       const HealthChatScreen()),
