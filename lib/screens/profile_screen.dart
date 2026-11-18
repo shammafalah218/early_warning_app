@@ -43,6 +43,7 @@ late final _medicalHistory = TextEditingController(
 );
   late String _language = widget.existing?.language ?? 'en';
   bool _saving = false;
+  bool _aiConsent = false;
 
   String? _range(String? v, num min, num max) {
     final x = num.tryParse(v ?? '');
@@ -231,6 +232,37 @@ FormField<bool>(
       : const SizedBox.shrink(),
 ),
           const SizedBox(height: 24),
+          const Divider(),
+const SizedBox(height: 12),
+
+Text(
+  'Privacy and Health Data Consent',
+  style: Theme.of(context).textTheme.titleMedium,
+),
+
+const SizedBox(height: 10),
+
+const Text(
+  'Your privacy and the protection of your health information '
+  'are important to us.\n\n'
+  'With your consent, relevant health readings and medical history '
+  'may be shared with Google Gemini AI to generate personalized '
+  'health explanations and general recommendations.\n\n'
+  'You may withdraw your consent at any time through your profile settings.',
+),
+
+CheckboxListTile(
+  value: _aiConsent,
+  onChanged: (v) => setState(() => _aiConsent = v ?? false),
+  title: const Text(
+    'I have read and understood this information and voluntarily '
+    'consent to sharing my relevant health data with Google Gemini AI.',
+  ),
+  controlAffinity: ListTileControlAffinity.leading,
+  contentPadding: EdgeInsets.zero,
+),
+
+const SizedBox(height: 16),
           FilledButton(
             onPressed: _saving ? null : _save,
             child: Text(_saving ? 'Saving…' : 'Save & Continue'),
