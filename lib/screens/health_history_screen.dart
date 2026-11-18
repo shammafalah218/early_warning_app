@@ -5,7 +5,12 @@ import '../models/reading.dart';
 import '../services/firestore_service.dart';
 
 class HealthHistoryScreen extends StatefulWidget {
-  const HealthHistoryScreen({super.key});
+  const HealthHistoryScreen({
+    super.key,
+    this.showSimulated = false,
+  });
+
+  final bool showSimulated;
 
   @override
   State<HealthHistoryScreen> createState() => _HealthHistoryScreenState();
@@ -69,7 +74,10 @@ class _HealthHistoryScreenState extends State<HealthHistoryScreen> {
       body: uid == null
           ? const Center(child: Text('Please sign in to view your history.'))
           : StreamBuilder<List<Reading>>(
-              stream: FirestoreService.instance.recentReadingsStream(uid),
+             stream: FirestoreService.instance.recentReadingsStream(
+  uid,
+  demo: widget.showSimulated,
+),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Center(child: Padding(
