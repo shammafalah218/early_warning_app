@@ -157,8 +157,12 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         actions: [
           IconButton(
               icon: const Icon(Icons.notifications_outlined),
-              onPressed: () => Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => const AlertsScreen()))),
+             onPressed: () => Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (_) => AlertsScreen(showSimulated: _demoMode),
+  ),
+)),
           PopupMenuButton<String>(
             onSelected: (v) async {
               if (v == 'profile') {
