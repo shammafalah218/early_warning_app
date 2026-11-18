@@ -128,6 +128,18 @@ CollectionReference<Map<String, dynamic>> _alerts(
 
   
 
+Stream<List<HealthAlert>> alertsStream(
+  String uid, {
+  bool demo = false,
+}) {
+  return _alerts(uid, demo: demo)
+      .orderBy('createdAt', descending: true)
+      .snapshots()
+      .map((snapshot) => snapshot.docs
+          .map(HealthAlert.fromDoc)
+          .toList());
+}
+
   Future<void> acknowledge(
   String uid,
   String alertId, {
