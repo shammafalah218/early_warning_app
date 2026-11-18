@@ -43,7 +43,7 @@ late final _medicalHistory = TextEditingController(
 );
   late String _language = widget.existing?.language ?? 'en';
   bool _saving = false;
-  bool _aiConsent = false;
+  late bool _aiConsent = widget.existing?.aiConsent ?? false;
 
   String? _range(String? v, num min, num max) {
     final x = num.tryParse(v ?? '');
