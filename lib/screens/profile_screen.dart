@@ -77,6 +77,7 @@ medicalHistory: _medicalHistory.text.trim().isEmpty
     ? null
     : _medicalHistory.text.trim(),
 language: _language,
+      aiConsent: _aiConsent,
     );
     await FirestoreService.instance.saveProfile(p);
     if (mounted && Navigator.canPop(context)) Navigator.pop(context);
