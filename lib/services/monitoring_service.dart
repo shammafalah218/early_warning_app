@@ -42,16 +42,24 @@ class MonitoringService {
       fresh = await _health.fetchSince(since);
     }
     await _db.saveReadings(uid, fresh);
-    await _db.setLastSync(uid, DateTime.now());
-    final alerts = await analyse(uid);
+    if (!demo) {
+  await _db.setLastSync(uid, DateTime.now());
+ }
+    final alerts = await analyse(uid, demo: demo);
     return SyncResult(fresh.length, alerts);
   }
 
   /// Run the detector on the last 35 days and create alerts for new findings.
   /// Also called after a manual BP/glucose entry.
-  Future<List<HealthAlert>> analyse(String uid) async {
-    final history = await _db.readingsSince(
-        uid, DateTime.now().subtract(const Duration(days: 35)));
+ Future<List<HealthAlert>> analyse(String uid, {bool demo = false}) async {
+  final allHistory = await _db.readingsSince(
+      uid, DateTime.now().subtract(const Duration(days: 35)));
+
+  final history = allHistory.where((r) {
+    return demo
+        ? r.source == 'simulated'
+        : r.source != 'simulated';
+  }).toList();
     final findings = _detector.detect(history);
     if (findings.isEmpty) return const [];
 
