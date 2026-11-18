@@ -31,7 +31,7 @@ class MonitoringService {
       {bool demo = false, DemoScenario scenario = DemoScenario.normal}) async {
     List<Reading> fresh;
     if (demo) {
-      await _db.deleteSimulatedReadings(uid);
+      await _db.clearDemoData(uid);
       fresh = _demo.generate(days: 30, scenario: scenario);
     } else {
       final err = await _health.connect();
@@ -53,7 +53,10 @@ class MonitoringService {
   /// Also called after a manual BP/glucose entry.
  Future<List<HealthAlert>> analyse(String uid, {bool demo = false}) async {
   final allHistory = await _db.readingsSince(
-      uid, DateTime.now().subtract(const Duration(days: 35)));
+  uid,
+  DateTime.now().subtract(const Duration(days: 35)),
+  demo: demo,
+);
 
   final history = allHistory.where((r) {
     return demo
@@ -64,8 +67,11 @@ class MonitoringService {
     if (findings.isEmpty) return const [];
 
     final profile = await _db.getProfile(uid);
-    final recentAlerts =
-        await _db.alertsSince(uid, DateTime.now().subtract(cooldown));
+    final recentAlerts = await _db.alertsSince(
+  uid,
+  DateTime.now().subtract(cooldown),
+  demo: demo,
+);
     final created = <HealthAlert>[];
 
     // One alert per category; the highest severity in the category wins.
@@ -91,7 +97,7 @@ class MonitoringService {
         profile: profile,
         isSimulated: demo,
       );
-      await _db.addAlert(uid, alert);
+      await _db.addAlert(uid, alert, demo: demo);
       created.add(alert);
     }
     return created;
