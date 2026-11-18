@@ -224,7 +224,11 @@ void showAlertDetail(BuildContext context, HealthAlert a) {
                   minimumSize: const Size.fromHeight(50),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))),
               onPressed: () {
-                FirestoreService.instance.acknowledge(uid, a.id!);
+               FirestoreService.instance.acknowledge(
+  uid,
+  a.id!,
+  demo: a.isSimulated,
+);
                 Navigator.pop(context);
               },
               child: const Text('Got it'),
