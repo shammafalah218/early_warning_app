@@ -49,7 +49,10 @@ class AlertsScreen extends StatelessWidget {
         foregroundColor: _ink,
       ),
       body: StreamBuilder<List<HealthAlert>>(
-        stream: FirestoreService.instance.alertsStream(uid),
+        stream: FirestoreService.instance.alertsStream(
+  uid,
+  demo: showSimulated,
+),
         builder: (context, snap) {
           if (snap.hasError) {
             return const Center(child: Padding(
