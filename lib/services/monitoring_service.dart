@@ -78,8 +78,10 @@ class MonitoringService {
           .map((f) => f.severity)
           .reduce((a, b) => a.index >= b.index ? a : b);
       // Cooldown: don't repeat the same category unless it got worse.
-      final repeated = recentAlerts.any((a) =>
-          a.category == entry.key && a.severity.index >= severity.index);
+     final repeated = recentAlerts.any((a) =>
+    a.isSimulated == demo &&
+    a.category == entry.key &&
+    a.severity.index >= severity.index);
       if (repeated) continue;
 
       final alert = await _llm.explain(
@@ -87,6 +89,7 @@ class MonitoringService {
         severity: severity,
         findings: entry.value,
         profile: profile,
+        isSimulated: demo,
       );
       await _db.addAlert(uid, alert);
       created.add(alert);
