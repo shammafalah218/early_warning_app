@@ -28,7 +28,12 @@ String _severityLabel(Severity s) => switch (s) {
     };
 
 class AlertsScreen extends StatelessWidget {
-  const AlertsScreen({super.key});
+  const AlertsScreen({
+    super.key,
+    this.showSimulated = false,
+  });
+
+  final bool showSimulated;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +41,10 @@ class AlertsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: _canvas,
       appBar: AppBar(
-        title: const Text('Early warnings', style: TextStyle(fontWeight: FontWeight.w800)),
+       title: Text(
+  showSimulated ? 'Demo warnings' : 'Early warnings',
+  style: const TextStyle(fontWeight: FontWeight.w800),
+),
         backgroundColor: _canvas,
         foregroundColor: _ink,
       ),
@@ -52,7 +60,9 @@ class AlertsScreen extends StatelessWidget {
           if (!snap.hasData) {
             return const Center(child: CircularProgressIndicator(color: _purple));
           }
-          final alerts = snap.data!;
+         final alerts = snap.data!
+    .where((a) => a.isSimulated == showSimulated)
+    .toList();
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 30),
             children: [
