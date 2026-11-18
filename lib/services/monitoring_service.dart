@@ -41,7 +41,7 @@ class MonitoringService {
           DateTime.now().subtract(const Duration(days: 30));
       fresh = await _health.fetchSince(since);
     }
-    await _db.saveReadings(uid, fresh);
+    await _db.saveReadings(uid, fresh, demo: demo);
     if (!demo) {
   await _db.setLastSync(uid, DateTime.now());
  }
