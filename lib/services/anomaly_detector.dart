@@ -16,6 +16,9 @@ class AnomalyDetector {
   static const bpSevereSys = 180, bpSevereDia = 120;
   static const gluFastingHigh = 126, gluFastingPrediabetes = 100;
   static const gluRandomHigh = 200, gluLow = 70, gluVeryLow = 54;
+
+// Severe high-glucose threshold (provisional app rule).
+static const gluVeryHigh = 300;
   static const rhrHigh = 100, rhrLow = 40;
   static const windowDays = 7, confirmK = 2, confirmN = 3;
   static const rhrMinDelta = 10.0, rhrZ = 3.0;
@@ -71,44 +74,77 @@ class AnomalyDetector {
     }
 
     // ---- fasting glucose ----
-    final g = lastN(
-        recent(ReadingType.bloodGlucose, windowDays,
-            where: (r) => r.context == 'fasting'),
-        confirmN);
-    if (g.isNotEmpty) {
-      final v = g.last.value;
-      if (v < gluVeryLow) {
-        out.add(Finding('glucose', Severity.urgent, 'glu_very_low', '${v.round()} mg/dL'));
-      } else if (v < gluLow) {
-        out.add(Finding('glucose', Severity.warning, 'glu_low', '${v.round()} mg/dL'));
-      } else {
-        final high = g.where((r) => r.value >= gluFastingHigh).length;
-        if (high >= confirmK) {
-          out.add(Finding('glucose', Severity.warning, 'glu_fasting_high',
-              '$high of last ${g.length} fasting readings at or above 126 mg/dL '
-              '(${g.map((r) => r.value.round()).join(', ')})'));
-        } else if (g.length >= confirmN &&
-            mean(g.map((r) => r.value)) >= gluFastingPrediabetes) {
-          out.add(Finding('glucose', Severity.info, 'glu_prediabetes_range',
-              'average fasting ${mean(g.map((r) => r.value)).round()} mg/dL'));
-        }
-      }
-    }
+  if (g.isNotEmpty) {
+  final v = g.last.value;
+
+  if (v >= gluVeryHigh) {
+    out.add(Finding(
+      'glucose',
+      Severity.urgent,
+      'glu_very_high',
+      '${v.round()} mg/dL (fasting)',
+    ));
+  } else if (v < gluVeryLow) {
+    out.add(Finding(
+      'glucose',
+      Severity.urgent,
+      'glu_very_low',
+      '${v.round()} mg/dL',
+    ));
+  } else if (v < gluLow) {
+    out.add(Finding(
+      'glucose',
+      Severity.warning,
+      'glu_low',
+      '${v.round()} mg/dL',
+    ));
+  } else {
+    // Keep the existing fasting high and baseline rules here.
 
     // ---- non-fasting / unknown-context glucose ----
-    final gr = recent(ReadingType.bloodGlucose, 1,
-        where: (r) => r.context != 'fasting');
-    if (gr.isNotEmpty && !out.any((f) => f.category == 'glucose')) {
-      final v = gr.last.value;
-      if (v < gluVeryLow) {
-        out.add(Finding('glucose', Severity.urgent, 'glu_very_low', '${v.round()} mg/dL'));
-      } else if (v < gluLow) {
-        out.add(Finding('glucose', Severity.warning, 'glu_low', '${v.round()} mg/dL'));
-      } else if (v >= gluRandomHigh) {
-        out.add(Finding('glucose', Severity.warning, 'glu_random_high',
-            '${v.round()} mg/dL (non-fasting)'));
-      }
-    }
+    // ---- non-fasting / unknown-context glucose ----
+final gr = recent(
+  ReadingType.bloodGlucose,
+  1,
+  where: (r) => r.context != 'fasting',
+);
+
+if (gr.isNotEmpty) {
+  final v = gr.last.value;
+
+  // Severe high glucose
+  if (v >= gluVeryHigh) {
+    out.add(Finding(
+      'glucose',
+      Severity.urgent,
+      'glu_very_high',
+      '${v.round()} mg/dL (non-fasting)',
+    ));
+  } else if (v < gluVeryLow) {
+    out.add(Finding(
+      'glucose',
+      Severity.urgent,
+      'glu_very_low',
+      '${v.round()} mg/dL',
+    ));
+  } else if (!out.any((f) => f.category == 'glucose') &&
+      v < gluLow) {
+    out.add(Finding(
+      'glucose',
+      Severity.warning,
+      'glu_low',
+      '${v.round()} mg/dL',
+    ));
+  } else if (!out.any((f) => f.category == 'glucose') &&
+      v >= gluRandomHigh) {
+    out.add(Finding(
+      'glucose',
+      Severity.warning,
+      'glu_random_high',
+      '${v.round()} mg/dL (non-fasting)',
+    ));
+  }
+}
 
     // ---- resting heart rate ----
     final rhr = recent(ReadingType.restingHeartRate, 3);
