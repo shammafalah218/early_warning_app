@@ -37,6 +37,7 @@ class HealthAlert {
   final String? model;
   final DateTime createdAt;
   final bool acknowledged;
+    final bool isSimulated;
 
   const HealthAlert({
     this.id,
@@ -51,6 +52,7 @@ class HealthAlert {
     this.model,
     required this.createdAt,
     this.acknowledged = false,
+      this.isSimulated = false,
   });
 
   Map<String, dynamic> toMap() => {
@@ -65,6 +67,7 @@ class HealthAlert {
         'model': model,
         'createdAt': Timestamp.fromDate(createdAt),
         'acknowledged': acknowledged,
+      'isSimulated': isSimulated,
       };
 
   factory HealthAlert.fromDoc(DocumentSnapshot<Map<String, dynamic>> d) {
@@ -89,6 +92,7 @@ class HealthAlert {
       model: m['model'] as String?,
       createdAt: (m['createdAt'] as Timestamp).toDate(),
       acknowledged: m['acknowledged'] as bool? ?? false,
+        isSimulated: m['isSimulated'] as bool? ?? false,
     );
   }
 }
