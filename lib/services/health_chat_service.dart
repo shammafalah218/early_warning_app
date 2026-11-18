@@ -1,4 +1,6 @@
 import 'package:firebase_ai/firebase_ai.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'firestore_service.dart';
 
 /// General educational chat, separate from the alert explanation model.
 /// Conversation history is kept in memory for this chat session only.
@@ -26,6 +28,18 @@ Do not request identifying or sensitive information unnecessarily.
   late final ChatSession _chat = _model.startChat();
 
   Future<String> ask(String message) async {
+    final user = FirebaseAuth.instance.currentUser;
+
+  if (user == null) {
+    return 'Please sign in to use AI Health Chat.';
+  }
+
+  final profile = await FirestoreService.instance.getProfile(user.uid);
+
+  if (profile?.aiConsent != true) {
+    return 'Please enable AI consent in your health profile before using the chatbot.';
+  }
+
     final response = await _chat.sendMessage(Content.text(message.trim()))
         .timeout(const Duration(seconds: 35));
     final answer = response.text?.trim();
