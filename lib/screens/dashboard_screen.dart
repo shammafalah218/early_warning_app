@@ -345,9 +345,16 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   'Glucose & blood pressure · 7 / 30 days',
   HealthHistoryScreen(showSimulated: _demoMode),
 ),
-                    _feature(Icons.chat_bubble_outline_rounded, 'AI Health Chat',
-                      'Ask general health questions',
-                      const HealthChatScreen()),
+                   _feature(
+  Icons.chat_bubble_outline_rounded,
+  'AI Health Chat',
+  p?.aiConsent == true
+      ? 'Ask general health questions'
+      : 'AI consent required — enable it in your profile',
+  p?.aiConsent == true
+      ? const HealthChatScreen()
+      : ProfileScreen(existing: p),
+),
                     _feature(Icons.medication_outlined, 'My Medications',
                       'Daily reminders and dose tracking',
                       const MedicationsScreen()),
