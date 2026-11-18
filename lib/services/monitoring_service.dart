@@ -4,6 +4,7 @@ import 'anomaly_detector.dart';
 import 'firestore_service.dart';
 import 'health_service.dart';
 import 'llm_service.dart';
+import 'reminder_service.dart';
 
 class SyncResult {
   final int readingsSaved;
@@ -23,6 +24,7 @@ class MonitoringService {
   final _demo = DemoDataService();
   final _detector = AnomalyDetector();
   final _llm = LlmService();
+  final _reminders = ReminderService.instance;
 
   static const cooldown = Duration(days: 3);
 
@@ -98,7 +100,13 @@ class MonitoringService {
         isSimulated: demo,
       );
       await _db.addAlert(uid, alert, demo: demo);
-      created.add(alert);
+created.add(alert);
+
+if (severity == Severity.urgent) {
+  await _reminders.urgentNotice(
+    'An urgent ${entry.key} health finding was detected. Please review your health alert.',
+  );
+}
     }
     return created;
   }
