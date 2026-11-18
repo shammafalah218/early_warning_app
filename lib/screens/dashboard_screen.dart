@@ -42,11 +42,15 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
   final _uid = FirebaseAuth.instance.currentUser!.uid;
   final _db = FirestoreService.instance;
   bool _syncing = false;
+  bool _demoMode = false;
 
   Future<void> _sync({bool demo = false, DemoScenario s = DemoScenario.normal}) async {
     setState(() => _syncing = true);
     final r = await MonitoringService.instance.sync(_uid, demo: demo, scenario: s);
     if (!mounted) return;
+    if (r.error == null) {
+  setState(() => _demoMode = demo);
+}
     setState(() => _syncing = false);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(r.error ??
@@ -213,11 +217,17 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
         builder: (context, ps) {
           final p = ps.data;
           return StreamBuilder<List<Reading>>(
-            stream: _db.recentReadingsStream(_uid),
+           stream: _db.recentReadingsStream(
+         _uid,
+          demo: _demoMode,
+          ),
             builder: (context, rs) {
               final r = rs.data ?? const <Reading>[];
               return StreamBuilder<List<HealthAlert>>(
-                stream: _db.alertsStream(_uid),
+             stream: _db.alertsStream(
+  _uid,
+  demo: _demoMode,
+),
                 builder: (context, alertSnap) {
                   final open = (alertSnap.data ?? const <HealthAlert>[])
                       .where((a) => !a.acknowledged)
@@ -296,12 +306,19 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                               color: Color(0xFF81728F))),
                         ])),
                     ])),
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(3, 8, 0, 14),
-                      child: Text('Live health readings',
-                        style: TextStyle(fontSize: 19, fontWeight: FontWeight.w800,
-                          color: Color(0xFF392550))),
-                    ),
+                    Padding(
+  padding: const EdgeInsets.fromLTRB(3, 8, 0, 14),
+  child: Text(
+    _demoMode
+        ? 'DEMO MODE - Simulated Readings'
+        : 'Live health readings',
+    style: const TextStyle(
+      fontSize: 19,
+      fontWeight: FontWeight.w800,
+      color: Color(0xFF392550),
+    ),
+  ),
+),
                     _metric(Icons.favorite, 'Heart rate', _latest(r, ReadingType.heartRate),
                         emptyText: 'Apple Watch data will appear here'),
                     _metric(Icons.bedtime_outlined, 'Resting heart rate', _latest(r, ReadingType.restingHeartRate)),

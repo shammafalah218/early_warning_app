@@ -16,6 +16,17 @@ class FirestoreService {
 
   DocumentReference<Map<String, dynamic>> _user(String uid) =>
       _db.collection('users').doc(uid);
+      CollectionReference<Map<String, dynamic>> _readings(
+  String uid, {
+  bool demo = false,
+}) =>
+    _user(uid).collection(demo ? 'demoReadings' : 'readings');
+
+CollectionReference<Map<String, dynamic>> _alerts(
+  String uid, {
+  bool demo = false,
+}) =>
+    _user(uid).collection(demo ? 'demoAlerts' : 'alerts');
 
   // ---------- profile ----------
   Stream<UserProfile?> profileStream(String uid) => _user(uid)
@@ -39,8 +50,12 @@ class FirestoreService {
   }
 
   // ---------- readings ----------
-  Future<void> saveReadings(String uid, List<Reading> readings) async {
-    final col = _user(uid).collection('readings');
+  Future<void> saveReadings(
+  String uid,
+  List<Reading> readings, {
+  bool demo = false,
+}) async {
+    final col = _readings(uid, demo: demo);
     for (var i = 0; i < readings.length; i += 450) {
       final batch = _db.batch();
       for (final r in readings.skip(i).take(450)) {
@@ -50,20 +65,24 @@ class FirestoreService {
     }
   }
 
-  Future<List<Reading>> readingsSince(String uid, DateTime since) async {
-    final q = await _user(uid)
-        .collection('readings')
+   Future<List<Reading>> readingsSince(
+  String uid,
+  DateTime since, {
+  bool demo = false,
+}) async {
+    final q = await _readings(uid, demo: demo)
         .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(since))
         .orderBy('timestamp')
         .get();
     return q.docs.map((d) => Reading.fromMap(d.data())).toList();
   }
-
   /// Last 35 days, live. The dashboard picks the latest value per type.
-  Stream<List<Reading>> recentReadingsStream(String uid) {
+  Stream<List<Reading>> recentReadingsStream(
+  String uid, {
+  bool demo = false,
+}) {
     final since = DateTime.now().subtract(const Duration(days: 35));
-    return _user(uid)
-        .collection('readings')
+    return _readings(uid, demo: demo)
         .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(since))
         .orderBy('timestamp')
         .snapshots()
@@ -85,15 +104,27 @@ class FirestoreService {
   }
 
   // ---------- alerts ----------
-  Future<void> addAlert(String uid, HealthAlert a) =>
-      _user(uid).collection('alerts').add(a.toMap());
+  Future<void> addAlert(
+  String uid,
+  HealthAlert a, {
+  bool demo = false,
+}) =>
+    _alerts(uid, demo: demo).add(a.toMap());
 
-  Stream<List<HealthAlert>> alertsStream(String uid) => _user(uid)
-      .collection('alerts')
-      .orderBy('createdAt', descending: true)
-      .limit(50)
-      .snapshots()
-      .map((s) => s.docs.map(HealthAlert.fromDoc).toList());
+  Future<List<HealthAlert>> alertsSince(
+  String uid,
+  DateTime since, {
+  bool demo = false,
+}) async {
+  final q = await _alerts(uid, demo: demo)
+      .where(
+        'createdAt',
+        isGreaterThanOrEqualTo: Timestamp.fromDate(since),
+      )
+      .get();
+
+  return q.docs.map(HealthAlert.fromDoc).toList();
+}
 
   Future<List<HealthAlert>> alertsSince(String uid, DateTime since) async {
     final q = await _user(uid)
@@ -103,11 +134,31 @@ class FirestoreService {
     return q.docs.map(HealthAlert.fromDoc).toList();
   }
 
-  Future<void> acknowledge(String uid, String alertId) => _user(uid)
-      .collection('alerts')
-      .doc(alertId)
-      .update({'acknowledged': true});
+  Future<void> acknowledge(
+  String uid,
+  String alertId, {
+  bool demo = false,
+}) =>
+    _alerts(uid, demo: demo)
+        .doc(alertId)
+        .update({'acknowledged': true});
+      
+Future<void> clearDemoData(String uid) async {
+  for (final name in ['demoReadings', 'demoAlerts']) {
+    final col = _user(uid).collection(name);
 
+    while (true) {
+      final docs = await col.limit(400).get();
+      if (docs.docs.isEmpty) break;
+
+      final batch = _db.batch();
+      for (final doc in docs.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+    }
+  }
+}
   // Optional doctor-set targets. No default medical targets are assumed.
   Stream<Map<String, dynamic>> targetsStream(String uid) =>
       _user(uid).collection('settings').doc('healthTargets').snapshots()
