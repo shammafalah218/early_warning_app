@@ -283,7 +283,7 @@ class _DashboardScreenState extends State<DashboardScreen> with SingleTickerProv
                                   style: TextStyle(color: Colors.white,
                                     fontWeight: FontWeight.w700)),
                                 const SizedBox(height: 3),
-                                Text(top?.title ?? 'No abnormal pattern detected',
+                                Text(top?.title ?? 'No unacknowledged alerts',
                                   style: const TextStyle(color: Color(0xFFE9DBFF),
                                     fontSize: 12)),
                               ])),
