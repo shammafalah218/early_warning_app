@@ -126,13 +126,7 @@ CollectionReference<Map<String, dynamic>> _alerts(
   return q.docs.map(HealthAlert.fromDoc).toList();
 }
 
-  Future<List<HealthAlert>> alertsSince(String uid, DateTime since) async {
-    final q = await _user(uid)
-        .collection('alerts')
-        .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(since))
-        .get();
-    return q.docs.map(HealthAlert.fromDoc).toList();
-  }
+  
 
   Future<void> acknowledge(
   String uid,
