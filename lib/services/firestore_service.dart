@@ -165,6 +165,7 @@ Future<void> clearDemoData(String uid) async {
     }
   }
 }
+
   // Optional doctor-set targets. No default medical targets are assumed.
   Stream<Map<String, dynamic>> targetsStream(String uid) =>
       _user(uid).collection('settings').doc('healthTargets').snapshots()
