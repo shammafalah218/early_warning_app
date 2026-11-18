@@ -42,8 +42,20 @@ class _ManualEntryScreenState extends State<ManualEntryScreen> {
 
   Future<void> _save() async {
     if (!_form.currentState!.validate()) return;
-    final hasBp = widget.showBloodPressure && _sys.text.isNotEmpty && _dia.text.isNotEmpty;
-    final hasGlu = widget.showBloodGlucose && _glu.text.isNotEmpty;
+   final hasSys = widget.showBloodPressure && _sys.text.trim().isNotEmpty;
+final hasDia = widget.showBloodPressure && _dia.text.trim().isNotEmpty;
+
+if (hasSys != hasDia) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text('Please enter both systolic and diastolic values.'),
+    ),
+  );
+  return;
+}
+
+final hasBp = hasSys && hasDia;
+final hasGlu = widget.showBloodGlucose && _glu.text.trim().isNotEmpty;
     if (!hasBp && !hasGlu) {
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Enter a reading before saving')));
