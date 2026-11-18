@@ -62,6 +62,7 @@ Rules:
     required Severity severity,
     required List<Finding> findings,
     required UserProfile? profile,
+    bool isSimulated = false,
   }) async {
     final context = {
       'language': profile?.language ?? 'en',
@@ -107,6 +108,7 @@ Rules:
         advice: advice,
         whenToSeekCare: j['whenToSeekCare'] as String? ?? '',
         generatedByLlm: true,
+        isSimulated: isSimulated,
         model: modelName,
         createdAt: DateTime.now(),
       );
@@ -114,7 +116,7 @@ Rules:
 } catch (e, stackTrace) {
   print('GEMINI ERROR: $e');
   print('GEMINI STACK TRACE: $stackTrace');
-  return _fallback(category, severity, findings);
+ return _fallback(category, severity, findings, isSimulated);
 }
 
   }
@@ -127,7 +129,7 @@ Rules:
       }[c] ??
       'Unusual health pattern';
 
-  HealthAlert _fallback(String category, Severity severity, List<Finding> f) =>
+  HealthAlert _fallback(String category, Severity severity, List<Finding> f, bool isSimulated) =>
       HealthAlert(
         category: category,
         severity: severity,
@@ -144,6 +146,7 @@ Rules:
             ? 'Now, especially if you feel unwell.'
             : 'If the pattern continues over the next few days.',
         generatedByLlm: false,
+    isSimulated: isSimulated,
         createdAt: DateTime.now(),
       );
 }
