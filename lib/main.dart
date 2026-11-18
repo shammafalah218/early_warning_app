@@ -33,6 +33,7 @@ class EarlyWarningApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
         title: 'Early Warning',
+    debugShowCheckedModeBanner: false,
         theme: ThemeData(colorSchemeSeed: Colors.deepPurple, useMaterial3: true),
         home: const AuthGate(),
       );
