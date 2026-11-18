@@ -64,6 +64,11 @@ Rules:
     required UserProfile? profile,
     bool isSimulated = false,
   }) async {
+
+    if (profile?.aiConsent != true) {
+  return _fallback(category, severity, findings, isSimulated);
+}
+   
     final context = {
       'language': profile?.language ?? 'en',
       'severity': severity.name,
