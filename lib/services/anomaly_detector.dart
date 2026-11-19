@@ -11,7 +11,7 @@ class AnomalyDetector {
   static const bpStage1Sys = 130, bpStage1Dia = 80;
   static const bpSevereSys = 180, bpSevereDia = 120;
 
-  static const gluFastingHigh = 126, gluFastingPrediabetes = 100;
+  static const gluFastingHigh = 130;
   static const gluRandomHigh = 200, gluLow = 70, gluVeryLow = 54;
 
   // Provisional severe high-glucose rule; requires clinical review.
@@ -133,23 +133,15 @@ class AnomalyDetector {
         ));
       } else {
         final high =
-            g.where((r) => r.value >= gluFastingHigh).length;
+            g.where((r) => r.value > gluFastingHigh).length;
 
         if (high >= confirmK) {
           out.add(Finding(
             'glucose',
             Severity.warning,
             'glu_fasting_high',
-            '$high of last ${g.length} fasting readings at or above 126 mg/dL '
+            '$high of last ${g.length} fasting readings above 130 mg/dL '
             '(${g.map((r) => r.value.round()).join(', ')})',
-          ));
-        } else if (g.length >= confirmN &&
-            mean(g.map((r) => r.value)) >= gluFastingPrediabetes) {
-          out.add(Finding(
-            'glucose',
-            Severity.info,
-            'glu_prediabetes_range',
-            'average fasting ${mean(g.map((r) => r.value)).round()} mg/dL',
           ));
         }
       }
