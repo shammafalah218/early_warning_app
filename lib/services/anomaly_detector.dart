@@ -184,10 +184,12 @@ where: (r) =>
     }
 
     // ---- Non-fasting / unknown-context glucose ----
+    
+    // ---- Non-fasting / unknown-context glucose ----
     final gr = recent(
       ReadingType.bloodGlucose,
       1,
-      where: (r) => r.context != 'fasting',
+      where: (r) => r.context != 'fasting' && r.value > 0,
     );
 
     if (gr.isNotEmpty) {
@@ -207,16 +209,14 @@ where: (r) =>
           'glu_very_low',
           '${v.round()} mg/dL',
         ));
-      } else if (!out.any((f) => f.category == 'glucose') &&
-          v < gluLow) {
+      } else if (v < gluLow) {
         out.add(Finding(
           'glucose',
           Severity.warning,
           'glu_low',
           '${v.round()} mg/dL',
         ));
-      } else if (!out.any((f) => f.category == 'glucose') &&
-          v >= gluRandomHigh) {
+      } else if (v >= gluRandomHigh) {
         out.add(Finding(
           'glucose',
           Severity.warning,
@@ -225,6 +225,7 @@ where: (r) =>
         ));
       }
     }
+
 
     // ---- Resting heart rate ----
     final rhr = recent(ReadingType.restingHeartRate, 3);
