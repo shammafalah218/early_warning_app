@@ -136,7 +136,9 @@ final bp = lastN(
       recent(
         ReadingType.bloodGlucose,
         windowDays,
-        where: (r) => r.context == 'fasting',
+where: (r) =>
+    r.context.toLowerCase().trim() == 'fasting' &&
+    r.value > 0,
       ),
       confirmN,
     );
