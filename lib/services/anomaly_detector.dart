@@ -55,10 +55,20 @@ static const bpLowDia = 60;
 
     // ---- Blood pressure ----
    
-    final bp = lastN(
-      recent(ReadingType.bloodPressure, windowDays),
-      confirmN,
-    );
+    
+final bp = lastN(
+  recent(
+    ReadingType.bloodPressure,
+    windowDays,
+    where: (r) =>
+        r.value > 0 &&
+        r.value2 != null &&
+        r.value2! > 0 &&
+        r.value > r.value2!,
+  ),
+  confirmN,
+);
+
 
     if (bp.isNotEmpty) {
       final last = bp.last;
