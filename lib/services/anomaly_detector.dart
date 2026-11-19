@@ -9,7 +9,11 @@ import '../models/reading.dart';
 class AnomalyDetector {
   static const bpStage2Sys = 140, bpStage2Dia = 90;
   static const bpStage1Sys = 130, bpStage1Dia = 80;
-  static const bpSevereSys = 180, bpSevereDia = 120;
+ static const bpSevereSys = 180, bpSevereDia = 120;
+
+// Low blood pressure thresholds
+static const bpLowSys = 90;
+static const bpLowDia = 60;
 
   static const gluFastingHigh = 130;
   static const gluRandomHigh = 200, gluLow = 70, gluVeryLow = 54;
@@ -50,6 +54,7 @@ class AnomalyDetector {
         v.reduce((a, b) => a + b) / v.length;
 
     // ---- Blood pressure ----
+   
     final bp = lastN(
       recent(ReadingType.bloodPressure, windowDays),
       confirmN,
@@ -57,16 +62,32 @@ class AnomalyDetector {
 
     if (bp.isNotEmpty) {
       final last = bp.last;
-      final dia = last.value2 ?? 0;
+      final dia = last.value2;
 
-      if (last.value >= bpSevereSys || dia >= bpSevereDia) {
+      // Severe high blood pressure
+      if (last.value >= bpSevereSys ||
+          (dia != null && dia >= bpSevereDia)) {
         out.add(Finding(
           'blood_pressure',
           Severity.urgent,
           'bp_severe',
+          '${last.value.round()}/${dia?.round() ?? "N/A"} mmHg',
+        ));
+      }
+
+      // Low blood pressure
+      else if (dia != null &&
+          (last.value < bpLowSys || dia < bpLowDia)) {
+        out.add(Finding(
+          'blood_pressure',
+          Severity.warning,
+          'bp_low',
           '${last.value.round()}/${dia.round()} mmHg',
         ));
-      } else {
+      }
+
+      // High blood pressure
+      else {
         final high = bp
             .where((r) =>
                 r.value >= bpStage2Sys ||
@@ -83,7 +104,9 @@ class AnomalyDetector {
           ));
         } else if (bp.length >= confirmN) {
           final ms = mean(bp.map((r) => r.value));
-          final md = mean(bp.map((r) => r.value2 ?? 0));
+          final md = mean(bp
+              .where((r) => r.value2 != null)
+              .map((r) => r.value2!));
 
           if (ms >= bpStage1Sys || md >= bpStage1Dia) {
             out.add(Finding(
@@ -96,6 +119,7 @@ class AnomalyDetector {
         }
       }
     }
+
 
     // ---- Fasting glucose ----
     final g = lastN(
