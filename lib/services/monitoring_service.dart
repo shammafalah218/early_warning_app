@@ -26,7 +26,7 @@ class MonitoringService {
   final _llm = LlmService();
   final _reminders = ReminderService.instance;
 
-  static const cooldown = Duration(days: 3);
+  static const cooldown = Duration(seconds: 0);
 
   /// Pull new wearable data (real or simulated), then analyse.
   Future<SyncResult> sync(String uid,
@@ -86,10 +86,13 @@ class MonitoringService {
           .map((f) => f.severity)
           .reduce((a, b) => a.index >= b.index ? a : b);
       // Cooldown: don't repeat the same category unless it got worse.
-     final repeated = recentAlerts.any((a) =>
+    final codes = entry.value.map((f) => f.code).toSet();
+
+final repeated = recentAlerts.any((a) =>
     a.isSimulated == demo &&
     a.category == entry.key &&
-    a.severity.index >= severity.index);
+    a.severity.index >= severity.index &&
+    a.findings.any((f) => codes.contains(f.code)));
       if (repeated) continue;
 
       final alert = await _llm.explain(
