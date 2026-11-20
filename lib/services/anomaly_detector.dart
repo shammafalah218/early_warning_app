@@ -137,8 +137,8 @@ final bp = lastN(
         ReadingType.bloodGlucose,
         windowDays,
 where: (r) =>
-    r.context.toLowerCase().trim() == 'fasting' &&
-    r.value > 0,
+(r.context?.toLowerCase().trim() ?? '') == 'fasting' && 
+   r.value > 0,
       ),
       confirmN,
     );
@@ -190,7 +190,7 @@ where: (r) =>
       ReadingType.bloodGlucose,
       1,
       where: (r) =>
-    r.context.toLowerCase().trim() != 'fasting' &&
+    (r.context?.toLowerCase().trim() ?? '') != 'fasting' &&
     r.value > 0,
     );
 
