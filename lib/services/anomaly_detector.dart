@@ -189,7 +189,9 @@ where: (r) =>
     final gr = recent(
       ReadingType.bloodGlucose,
       1,
-      where: (r) => r.context != 'fasting' && r.value > 0,
+      where: (r) =>
+    r.context.toLowerCase().trim() != 'fasting' &&
+    r.value > 0,
     );
 
     if (gr.isNotEmpty) {
