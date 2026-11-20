@@ -21,7 +21,10 @@ Future<void> main() async {
   // into Firebase console → App Check → Apps → Manage debug tokens.
   await FirebaseAppCheck.instance.activate(
     androidProvider: kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
-    appleProvider: kDebugMode ? AppleProvider.debug : AppleProvider.appAttest,
+    appleProvider: (kDebugMode ||
+        const bool.fromEnvironment('EWS_TEST_APP_CHECK'))
+    ? AppleProvider.debug
+    : AppleProvider.appAttest,
   );
 
   runApp(const EarlyWarningApp());
