@@ -55,6 +55,18 @@ if (hasSys != hasDia) {
 }
 
 final hasBp = hasSys && hasDia;
+if (hasBp &&
+    double.parse(_sys.text.trim()) <=
+        double.parse(_dia.text.trim())) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text(
+        'Systolic pressure must be higher than diastolic pressure.',
+      ),
+    ),
+  );
+  return;
+}
 final hasGlu = widget.showBloodGlucose && _glu.text.trim().isNotEmpty;
     if (!hasBp && !hasGlu) {
       ScaffoldMessenger.of(context).showSnackBar(
